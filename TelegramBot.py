@@ -1,8 +1,12 @@
 import telebot
 from telebot import types
 import random
+from os import getenv
 
-bot = telebot.TeleBot("", parse_mode=None)
+SECRET_KEY = str(getenv("SECRET")) # Берет значение ключа из файла .env (В docker-compose прокидывается отдельно)
+game_vars = ["Камень", "Ножницы", "Бумага", "Счет"]
+
+bot = telebot.TeleBot(SECRET_KEY, parse_mode=None)
 # @bot.message_handler(content_types=['text'])
 # def get_text_messages(message):
 #     if message.text == "Привет":
@@ -27,7 +31,6 @@ bot = telebot.TeleBot("", parse_mode=None)
 # @bot.callback_query_handler(func=lambda call: True)
 # def callback_inline(call):
 
-
 @bot.message_handler(commands=['info'])
 def get_bot_info(message):
     bot.send_message(message.from_user.id, "Привет, это первый проект моего создателя! В данный момент я в разработке.")
@@ -38,18 +41,20 @@ def get_start_chat(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     but1 = types.KeyboardButton("Команды")
     markup.add(but1)
-    bot.send_message(message.chat.id, text="Привет, {0.first_name}!".format(message.from_user), reply_markup=markup)
+    bot.send_message(message.chat.id, text=f"Привет, {message.from_user.first_name}!", reply_markup=markup)
 @bot.message_handler(commands=['game'])
 def get_bot_info(message):
 
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-    but2 = types.KeyboardButton("Камень")
-    but3 = types.KeyboardButton("Ножницы")
-    but4 = types.KeyboardButton("Бумага")
-    but5 = types.KeyboardButton("Счет")
-    markup.add(but2, but3, but4, but5)
+    buttons = [types.KeyboardButton(i) for i in game_vars]
+    # but2 = types.KeyboardButton("Камень")
+    # but3 = types.KeyboardButton("Ножницы")
+    # but4 = types.KeyboardButton("Бумага")
+    # but5 = types.KeyboardButton("Счет")
+    markup.add(buttons)
     bot.send_message(message.from_user.id, "Отлично, давай повеселимся!\nВыбирай - камень, ножницы или бумага:"
                      .format(message.from_user), reply_markup=markup)
+
 @bot.message_handler(content_types=['text'])
 def func(message):
     computer_counts = 0
